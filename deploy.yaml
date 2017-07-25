@@ -1,0 +1,86 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: vstsdemo-api
+  labels:
+    name: vstsdemo-api
+    app: demo
+spec:
+  strategy:
+    type: Recreate
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        name: vstsdemo-api
+        app: demo
+    spec:
+      containers:
+      - name: vstsdemo-api
+        image: $ACR_DNS/vstsdemo.api:$BUILD_ID
+        ports:
+        - containerPort: 5103
+          protocol: TCP
+        env:
+        - name: "ASPNETCORE_ENVIRONMENT"
+          value: "Development"
+        - name: "ASPNETCORE_URLS"
+          value: "http://0.0.0.0:5103"
+        - name: "RedisHost"
+          value: "vstsdemo-redis.default.svc.cluster.local"
+        - name: "RedisPort"
+          value: "6379"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: vstsdemo-redis
+  labels:
+    name: vstsdemo-redis
+    app: demo
+spec:
+  containers:
+  - name: vstsdemo-redis
+    image: redis
+    ports:
+    - containerPort: 6379
+      protocol: TCP
+    env:
+    - name: "LOCAL_REDIS"
+      value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vstsdemo-api
+  labels:
+    name: vstsdemo-api
+    app: demo
+spec:
+  ports:
+    - port: 80
+      targetPort: 5103
+      protocol: TCP
+      name: http
+  selector:
+    name: vstsdemo-app
+    app: demo
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vstsdemo-redis
+  labels:
+    name: vstsdemo-redis
+    app: demo
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+      name: redis
+      protocol: TCP
+  selector:
+    name: votedemo-data
+    app: demo
+  type: NodePort
