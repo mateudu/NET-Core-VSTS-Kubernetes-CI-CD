@@ -1,0 +1,19 @@
+version: '2'
+
+services:
+  vstsdemo.api:
+    image: vstsdemo.api
+    build:
+      context: ./VSTSDemo.Api
+      dockerfile: Dockerfile
+    depends_on:
+      - vstsdemo.redis      
+    links:
+      - vstsdemo.redis
+      
+  vstsdemo.redis:
+    image: redis
+    environment:
+      LOCAL_REDIS: "true"
+    ports:
+      - "6379:6379"
