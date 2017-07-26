@@ -63,7 +63,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    name: vstsdemo-app
+    name: vstsdemo-api
     app: demo
   type: LoadBalancer
 ---
@@ -81,6 +81,6 @@ spec:
       name: redis
       protocol: TCP
   selector:
-    name: votedemo-data
+    name: vstsdemo-redis
     app: demo
   type: NodePort
